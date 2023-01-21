@@ -1,10 +1,13 @@
 const express = require("express");
+const cors = require("cors");
 const videoRoutes = require("./routes/videos");
-
 const app = express();
 
-app.use("/videos/", videoRoutes);
-// app.use("/upload/", uploadRoutes);
+app.use(express.json());
+app.use(express.static("./public"));
+app.use(cors());
+
+app.use("/api/v1/videos/", videoRoutes);
 
 app.use((error, req, res, next) => {
   if (res.headerSent) {
