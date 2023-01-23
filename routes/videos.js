@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require("fs");
 const { v4: uuid } = require("uuid");
 const videosData = require("../data/videos.json");
+const fileUpload = require("../middleware/file-upload");
 
 router.get("/", (req, res, next) => {
   const firstVideo = videosData[0];
@@ -25,7 +26,7 @@ router.get("/", (req, res, next) => {
   res.status(201).json({ video: firstVideo, nextVideos: nextVideos });
 });
 
-router.get("/:videoID", (req, res, next) => {
+router.get("/:videoID", fileUpload.single("image"), (req, res, next) => {
   const videoID = req.params.videoID;
   if (!videoID) {
     const error = new Error("No video with that id exists");
@@ -52,21 +53,30 @@ router.get("/:videoID", (req, res, next) => {
   res.status(201).json({ video: video, nextVideos: nextVideos });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", fileUpload.single("image"), (req, res, next) => {
   const title = req.body.title;
   const description = req.body.description;
+  const dateTime = new Date();
+  const timestamp = dateTime.getTime();
+
+  if (req.file) {
+    const newPath = `http://localhost:8080/images/${req.file.filename}`;
+    console.log(newPath);
+  }
 
   const newVideoOjb = {
     id: uuid(),
     title: title,
     channel: "BrainStation",
-    image: "https://i.imgur.com/l2Xfgpl.jpg",
+    image: !req.file
+      ? "http://localhost:8080/images/default-video-image.jpg"
+      : newPath,
     description: description,
     views: "1,001,023",
     likes: "110,985",
     duration: "4:01",
     video: "https://project-2-api.herokuapp.com/stream",
-    timestamp: 1626032763000,
+    timestamp: timestamp,
     comments: [
       {
         id: "35bba08b-1b51-4153-ba7e-6da76b5ec1b9",

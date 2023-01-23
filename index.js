@@ -3,13 +3,18 @@ const cors = require("cors");
 const videoRoutes = require("./routes/videos");
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static("./public"));
-app.use(cors());
 
 app.use("/api/v1/videos/", videoRoutes);
 
 app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink()(req.file.path, (error) => {
+      console.error(error);
+    });
+  }
   if (res.headerSent) {
     return next(error);
   }
